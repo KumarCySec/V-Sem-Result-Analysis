@@ -104,7 +104,7 @@ function subjectStats(code){
   return {appeared:appeared.length,passed:passed.length,passPercent:appeared.length?((passed.length/appeared.length)*100).toFixed(1):"-",dist};
 }
 
-const TABS=["Overview","Students","Subjects","Toppers"];
+const TABS=["Overview","Students","Subjects"];
 
 export default function App(){
   const [tab,setTab]=useState("Overview");
@@ -112,7 +112,7 @@ export default function App(){
   const [sortCol,setSortCol]=useState("sno");
   const [sortDir,setSortDir]=useState(1);
   const [selectedStudent,setSelectedStudent]=useState(null);
-  const [selectedSubject,setSelectedSubject]=useState(null);
+  const [selectedSubject,setSelectedSubject]=useState<string|null>(null);
 
   const totalStudents=students.length;
   const allPassStudents=students.filter(studentPass).length;
@@ -132,16 +132,6 @@ export default function App(){
   },[search,sortCol,sortDir]);
 
   const subStats=useMemo(()=>subjectCodes.map(c=>({code:c,...subjectStats(c)})),[]);
-
-  const toppers=useMemo(()=>[...students].filter(s=>failedSubjects(s).length===0)
-    .sort((a,b)=>{
-      const aO=subjectCodes.filter(c=>a.grades[c]==="O").length;
-      const bO=subjectCodes.filter(c=>b.grades[c]==="O").length;
-      if(bO!==aO)return bO-aO;
-      const aAp=subjectCodes.filter(c=>a.grades[c]==="A+").length;
-      const bAp=subjectCodes.filter(c=>b.grades[c]==="A+").length;
-      return bAp-aAp;
-    }).slice(0,10),[]);
 
   const gradeDist=useMemo(()=>{
     const d={O:0,"A+":0,A:0,"B+":0,B:0,C:0,U:0};
@@ -367,40 +357,7 @@ export default function App(){
         </div>
       </>}
 
-      {/* TOPPERS */}
-      {tab==="Toppers" && <>
-        <div style={{marginBottom:20,color:"#90a4ae",fontSize:14}}>🏆 Top 10 students by grade performance (no arrears) — ranked by O count, then A+ count</div>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {toppers.map((s,i)=>{
-            const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"⭐";
-            const color=i===0?"#ffd700":i===1?"#c0c0c0":i===2?"#cd7f32":"#6a11cb";
-            const oCount=subjectCodes.filter(c=>s.grades[c]==="O").length;
-            const apCount=subjectCodes.filter(c=>s.grades[c]==="A+").length;
-            return (
-              <div key={s.regno} style={{background:"#ffffff08",border:`1px solid ${color}44`,borderRadius:14,padding:"16px 20px",display:"flex",alignItems:"center",gap:16,boxShadow:`0 2px 16px ${color}18`}}>
-                <div style={{fontSize:28,width:36}}>{medal}</div>
-                <div style={{width:28,textAlign:"center",fontWeight:800,color:"#90a4ae",fontSize:15}}>#{i+1}</div>
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:700,fontSize:16}}>{s.name}</div>
-                  <div style={{fontSize:12,color:"#90a4ae",marginTop:2}}>{s.regno}</div>
-                  <div style={{display:"flex",gap:4,marginTop:8,flexWrap:"wrap"}}>
-                    {subjectCodes.filter(c=>s.grades[c]!=="").map(c=>{
-                      const gr=s.grades[c];
-                      return <span key={c} style={{background:gradeColor(gr)+"22",color:gradeColor(gr),border:`1px solid ${gradeColor(gr)}55`,borderRadius:6,padding:"1px 8px",fontSize:11,fontWeight:700}}>{gr}</span>;
-                    })}
-                  </div>
-                </div>
-                <div style={{textAlign:"right",display:"flex",flexDirection:"column",gap:6}}>
-                  <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
-                    <span style={{background:"#00c85322",border:"1px solid #00c853",color:"#00c853",borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:700}}>O × {oCount}</span>
-                    <span style={{background:"#00e67622",border:"1px solid #00e676",color:"#00e676",borderRadius:20,padding:"3px 12px",fontSize:12,fontWeight:700}}>A+ × {apCount}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </>}
+
 
       </div>
     </div>
