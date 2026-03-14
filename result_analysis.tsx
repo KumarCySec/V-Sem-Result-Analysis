@@ -113,6 +113,7 @@ export default function App(){
   const [sortDir,setSortDir]=useState(1);
   const [selectedStudent,setSelectedStudent]=useState(null);
   const [selectedSubject,setSelectedSubject]=useState<string|null>(null);
+  const [selectedSubjectGrade,setSelectedSubjectGrade]=useState<string|null>(null);
 
   const totalStudents=students.length;
   const allPassStudents=students.filter(studentPass).length;
@@ -347,7 +348,9 @@ export default function App(){
                     {["O","A+","A","B+","B","C","U"].map(g=>{
                       const c=s.dist[g]||0;
                       if(!c)return null;
-                      return <span key={g} style={{background:gradeColor(g)+"22",border:`1px solid ${gradeColor(g)}55`,color:gradeColor(g),borderRadius:20,padding:"3px 12px",fontSize:13,fontWeight:700}}>{g}: {c}</span>;
+                      return <button key={g} onClick={(e)=>{e.stopPropagation();setSelectedSubjectGrade(g);}} style={{background:gradeColor(g)+"22",border:`1px solid ${gradeColor(g)}55`,color:gradeColor(g),borderRadius:20,padding:"4px 14px",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all 0.2s"}}
+                        onMouseEnter={e=>e.currentTarget.style.background=gradeColor(g)+"44"}
+                        onMouseLeave={e=>e.currentTarget.style.background=gradeColor(g)+"22"}>{g}: {c}</button>;
                     })}
                   </div>
                 )}
@@ -355,6 +358,32 @@ export default function App(){
             );
           })}
         </div>
+        
+        {selectedSubject && selectedSubjectGrade && (
+          <div style={{position:"fixed",inset:0,background:"#000a",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16}} onClick={()=>setSelectedSubjectGrade(null)}>
+            <div onClick={e=>e.stopPropagation()} style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",border:"1px solid #ffffff22",borderRadius:20,padding:28,maxWidth:520,width:"100%",maxHeight:"80vh",display:"flex",flexDirection:"column",boxShadow:"0 20px 60px #000c"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
+                <div>
+                  <div style={{fontWeight:800,fontSize:20}}>{subjectNames[selectedSubject]}</div>
+                  <div style={{fontSize:12,color:"#90a4ae",marginTop:3}}>{selectedSubject} — Grade <b style={{color:gradeColor(selectedSubjectGrade),fontSize:14}}>{selectedSubjectGrade}</b></div>
+                </div>
+                <button onClick={()=>setSelectedSubjectGrade(null)} style={{background:"transparent",border:"none",color:"#fff",fontSize:24,cursor:"pointer",lineHeight:1}}>×</button>
+              </div>
+              
+              <div style={{overflowY:"auto",paddingRight:8,display:"flex",flexDirection:"column",gap:8}}>
+                {students.filter(s=>s.grades[selectedSubject]===selectedSubjectGrade).map((s,i)=>(
+                  <div key={s.regno} style={{background:"#ffffff08",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",gap:12,border:"1px solid #ffffff15"}}>
+                    <div style={{width:24,fontSize:13,color:"#90a4ae",fontWeight:700}}>{i+1}.</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,fontSize:14}}>{s.name}</div>
+                      <div style={{fontSize:11,color:"#90a4ae",marginTop:2}}>{s.regno}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </>}
 
 
